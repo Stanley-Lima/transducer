@@ -28,7 +28,7 @@ except Exception as e:
 
 @app.route("/")
 def hello():
-	return "Rapid Interface Fabric as a Service. Post the RAML to /scan or post a multi-part (RAML, JSON*) to /build."
+	return "Rapid Interface Transducer as a Service. Post the RAML to /scan or post a multi-part (RAML, JSON*) to /build."
 
 @app.route("/scan", methods=["POST"])
 def scan():
