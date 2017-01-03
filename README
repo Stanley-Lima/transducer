@@ -16,7 +16,7 @@ Currently, RAML files are supported as input. In the future, this may be
 extended to comparable formats such as Swagger.
 
 One instance of the tool is online at:
-...
+https://serviceprototypinglab.github.io/transducer/
 
 Installation:
 -------------
