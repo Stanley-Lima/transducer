@@ -1,0 +1,66 @@
+Service Interface Transducer for Rapid Prototyping
+(☺) 2016 Josef Spillner <josef.spillner@zhaw.ch>
+================================================
+
+The transducer turns a service description file into a running and documented
+service prototype with low effort and in a short amount of time due to heavy
+automation.  It can be controlled from the command line, from a web service
+and from an interactive and user-friendly web application. From the user's
+point of view, the transducer first asks for a service description file, then
+scans it, asks for potential dependencies, and then takes the entire input to
+produce the prototype. It will not be a functionally complete service but it
+will give a first idea about how to work with the specified interfaces,
+resources and data models.
+
+Currently, RAML files are supported as input. In the future, this may be
+extended to comparable formats such as Swagger.
+
+One instance of the tool is online at:
+...
+
+Installation:
+-------------
+The installation effort differs depending on whether the tool should be used
+standalone or run as a shared service. In the former case, isolated containers
+with the running service can be produced, but in the latter case, due to
+real-time requirements, all services are running directly on the host and are
+merely differentiated by their port numbers.
+
+The installation instructions and scripts assume a recent Debian (9/Stretch)
+or Ubuntu (16.10/Yakkety Yak) system. With minor modifications, other systems
+should be supported as well.
+For the basic installation of Ramses and the web service stack, run:
+ % ./install-shared.sh
+For the shared installation, run in addition:
+ % ./install-isolated.sh
+
+Afterwards, run the service and access the web application, or use the
+command-line tool.
+ % cd service && ./transducer-service
+ % sensible-browser web/index.html
+ % ./cli/transducer example/api.raml
+
+File structure:
+---------------
+├── cli
+│   ├── transducer                    -> start isolated instance (venv+docker)
+│   └── impl
+│       ├── Dockerfile                -> containerisation
+│       └── ramlincludes.py           -> helper script to extract dependencies
+├── doc
+│   ├── transducer-architecture.dia   -> architecture figure source
+│   └── transducer-architecture.png   -> architecture figure
+├── example
+│   ├── api.raml                      -> service description, references .json
+│   └── items.json                    -> data schema definition
+├── install-isolated.sh               -> basic install script
+├── install-shared.sh                 -> extended install script for service
+├── README                            -> this file
+├── service
+│   ├── transducer-service            -> web service
+│   ├── transducer-shared             -> start shared instance
+│   └── testservice                   -> test invocation client
+└── web
+    ├── css
+    │   └── bootstrap.min.css         -> style sheet for web app
+    └── index.html                    -> web app

@@ -1,0 +1,34 @@
+#!/bin/bash
+
+if [ -z $1 ]; then
+	echo "Syntax: $0 <api.raml> [<portnumber>]" >&2
+	exit -1
+fi
+if [ -z $2 ]; then
+	pnumber=5000
+else
+	# NOTE: security issues with paths etc., needs to be stripped
+	pnumber=$2
+fi
+
+pfolder=shared_$pnumber
+rm -rf $pfolder
+
+if [ ! -d shared ]; then
+	mkdir shared
+	cd shared
+	echo 1 | pcreate -s ramses_starter .
+	cd ..
+fi
+
+cp -r shared $pfolder
+cd $pfolder
+
+sed -i -e "s,sqlalchemy.url = postgresql://localhost:5432/shared,sqlalchemy.url = sqlite:////tmp/$pfolder.sqlite,g" local.ini
+sed -i -e "s/6543/$pnumber/" local.ini
+
+cd ..
+cp `./cli/impl/ramlincludes.py $1` $pfolder
+cd $pfolder
+
+PYTHONPATH=. pserve local.ini &

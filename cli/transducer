@@ -1,0 +1,31 @@
+#!/bin/bash
+
+if [ -z $1 ]; then
+	echo "Syntax: $0 <api.raml> [<containername>]" >&2
+	exit -1
+fi
+if [ -z $2 ]; then
+	pfolder=transducerproject
+else
+	# NOTE: security issues with paths etc., needs to be stripped
+	pfolder=$2
+fi
+
+rm -rf $pfolder
+
+mkdir $pfolder
+cd $pfolder
+virtualenv venv
+source venv/bin/activate
+pip install ramses
+echo 1 | pcreate -s ramses_starter .
+
+sed -i -e "s,sqlalchemy.url = postgresql://localhost:5432/$pfolder,sqlalchemy.url = sqlite:////tmp/$pfolder.sqlite,g" local.ini
+
+cd ..
+cp `./cli/impl/ramlincludes.py $1` $pfolder
+cd $pfolder
+
+cp ../cli/impl/Dockerfile .
+# NOTE: sudo calls hard to automate (needs /etc/sudoers extension); debian-specific; see also install.sh
+sudo docker build -t $pfolder .

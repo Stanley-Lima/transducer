@@ -1,0 +1,81 @@
+#!/usr/bin/env python3
+
+import os
+import tempfile
+import subprocess
+import random
+
+from flask import Flask, request
+app = Flask(__name__)
+
+os.chdir("..")
+
+try:
+	from flask_cors import CORS
+	CORS(app)
+	print("CORS enabled.")
+except Exception as e:
+	import sys
+	print("Warning: CORS disabled, web access limited. ({:s})".format(str(e)), file=sys.stderr)
+
+@app.route("/")
+def hello():
+	return "Rapid Interface Fabric as a Service. Post the RAML to /scan or post a multi-part (RAML, JSON*) to /build."
+
+@app.route("/scan", methods=["POST"])
+def scan():
+	fd, filepath = tempfile.mkstemp(suffix=".raml")
+	f = os.fdopen(fd, "w")
+	f.write(request.data.decode("utf-8"))
+	f.flush()
+
+	call = subprocess.run("./cli/impl/ramlincludes.py {:s}".format(filepath), stdout=subprocess.PIPE, shell=True)
+
+	os.unlink(filepath)
+
+	paths = call.stdout.decode("utf-8")
+	filenames = []
+	for path in paths.split("\n"):
+		filenames.append(os.path.basename(path))
+
+	return "\n".join(filenames)
+
+@app.route("/build", methods=["POST"])
+def build():
+	data = request.data.decode("utf-8")
+	multiparts = data.split("\n&")
+	tmp = tempfile.mkdtemp()
+	raml = True
+	ramlfilepath = None
+	filenames = []
+	for i, multipart in enumerate(multiparts):
+		print("**", multipart, "**")
+		if raml:
+			raml = False
+			suffix = ".json"
+			fd, ramlfilepath = tempfile.mkstemp(suffix=".raml", dir=tmp)
+			f = os.fdopen(fd, "w")
+			f.write(multipart)
+			f.flush()
+
+			call = subprocess.run("./cli/impl/ramlincludes.py {:s}".format(os.path.join(tmp, ramlfilepath)), stdout=subprocess.PIPE, shell=True)
+			paths = call.stdout.decode("utf-8")
+			for path in paths.split("\n"):
+				filenames.append(os.path.basename(path))
+		else:
+			f = open(os.path.join(tmp, filenames[i]), "w")
+			f.write(multipart)
+			f.close()
+
+	#tmpname = "".join([chr(random.randint(97, 122)) for x in [0] * 5])
+	# FIXME: maintain transient list of used ports
+	tmpname = str(random.randint(10000, 10200))
+
+	call = subprocess.run("./service/transducer-shared {:s} {:s}".format(os.path.join(tmp, ramlfilepath), tmpname), shell=True)
+	if call.returncode == 0:
+		return "success {:s}".format(tmpname)
+	else:
+		return "fail"
+
+if __name__ == "__main__":
+	app.run()

@@ -1,0 +1,5 @@
+# /scan
+#curl -X POST --data-binary @example/api.raml http://localhost:5000/scan --header "Content-Type: application/raml+yaml"
+
+# /build -> not really multipart, as unsupported by curl!
+curl -X POST --data-binary @example/api.raml --data-binary @example/items.json http://localhost:5000/build --header "Content-Type: multipart/byte-ranges"
