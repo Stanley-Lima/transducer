@@ -2,3 +2,6 @@ wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.1.1.ta
 tar xvf elasticsearch-5.1.1.tar.gz
 cd elasticsearch-5.1.1/bin/
 ./elasticsearch
+
+# add to elasticsearch.in.sh: ES_JAVA_OPTS="-Xms1g -Xmx1g"
+# add to /etc/rc.local: su -c "cd /home/<user>/.../elasticsearch-5.1.1/bin && ./elasticsearch &" <user>

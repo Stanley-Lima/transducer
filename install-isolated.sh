@@ -11,4 +11,5 @@ echo "$USER ALL=NOPASSWD: ALL" | sudo tee -a /etc/sudoers >/dev/null
 # WS tool
 
 sudo apt-get -y --no-install-recommends install python3-flask python3-setuptools
-sudo easy_install3 flask-cors # or perhaps without setuptools: pip3 install -U flask-cors
+sudo easy_install3 flask-cors flask-sslify # or perhaps without setuptools: pip3 install -U flask-cors
+sudo apt-get -y --no-install-recommends install python3-openssl # optional

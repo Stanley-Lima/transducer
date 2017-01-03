@@ -18,6 +18,14 @@ except Exception as e:
 	import sys
 	print("Warning: CORS disabled, web access limited. ({:s})".format(str(e)), file=sys.stderr)
 
+try:
+	from flask_sslify import SSLify
+	sslify = SSLify(app)
+	print("SSL enabled.")
+except Exception as e:
+	import sys
+	print("Warning: SSL disabled, use from HTTPS webapps might be blocked. ({:s})".format(str(e)), file=sys.stderr)
+
 @app.route("/")
 def hello():
 	return "Rapid Interface Fabric as a Service. Post the RAML to /scan or post a multi-part (RAML, JSON*) to /build."
@@ -78,4 +86,6 @@ def build():
 		return "fail"
 
 if __name__ == "__main__":
+	# global service: add host="0.0.0.0" and open port 5000 in the firewall (e.g. cloud configuration)
+	# SSL service: add ssl_context="adhoc" after installing python3-openssl
 	app.run()
